@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -6,6 +7,9 @@ pipeline {
         registryCredential = 'dockerhub'
         dockerImage = 'nodejsapp'
     }
+
+    stages {
+        
         stage('Building image') {
             steps {
                 script {
@@ -31,7 +35,7 @@ pipeline {
                 }
             }
         }
-    
+    }
 
     post {
         always {
