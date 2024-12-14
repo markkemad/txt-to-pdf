@@ -6,14 +6,6 @@ pipeline {
         registryCredential = 'dockerhub'
         dockerImage = 'nodejsapp'
     }
-
-    stages {
-        stage('Cloning Git') {
-            steps {
-                git branch: 'main', url: 'https://github.com/markkemad/txt-to-pdf.git', credentialsId: 'github'
-            }
-        }
-
         stage('Building image') {
             steps {
                 script {
