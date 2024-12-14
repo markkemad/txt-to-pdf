@@ -23,7 +23,7 @@ WORKDIR /app
 COPY --from=builder /app /app
 
 # Expose the application port (8080)
-EXPOSE 8080
+EXPOSE 3001
 
 # Run the application
 CMD ["node", "app.js"]
