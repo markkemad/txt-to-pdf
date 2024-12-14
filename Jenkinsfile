@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins credential ID for Docker Hub
-        DOCKER_IMAGE = ''markemadd/txt-to-pdf-appp' // Replace with your Docker Hub username and image name
+        DOCKER_IMAGE = 'markemadd/txt-to-pdf-appp' 
         GIT_REPO = 'https://github.com/markkemad/txt-to-pdf.git' // Replace with your GitHub repo
     }
 
