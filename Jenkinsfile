@@ -1,71 +1,35 @@
-pipeline {
-    agent any
-
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub') // Jenkins credential ID for Docker Hub
-        DOCKER_IMAGE = 'markemadd/txt-to-pdf-appp' 
-        GIT_REPO = 'https://github.com/markkemad/txt-to-pdf.git' // Replace with your GitHub repo
+pipeline { 
+    environment { 
+        registry = "markemadd/txt-to-pdf-app" 
+        registryCredential = 'dockerhub' 
+        dockerImage = 'nodejsapp' 
     }
-
+    agent any 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: env.GIT_REPO
+        stage('Cloning Git') { 
+            steps { 
+                git 'https://github.com/markkemad/txt-to-pdf.git' 
             }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                dockerBuildAndPublish {
-                    repositoryName(env.DOCKER_IMAGE)
-                    tag('latest')
-                    registryCredentialsId('docker-hub-credentials')
+        } 
+        stage('Building image') { 
+            steps { 
+                script { 
+                    dockerImage = docker.build registry + ":latest" 
                 }
-            }
+            } 
         }
-
-        stage('Run Container') {
-            steps {
-                script {
-                    docker.image(env.DOCKER_IMAGE).run('--name nodejs-container -p 3001:3001')
-                }
-            }
-        }
-
-        stage('Test Container') {
-            steps {
-                script {
-                    sh 'sleep 10' // Wait for the container to start up
-                    sh "curl -f http://localhost:3001 || exit 1"
-                }
-            }
-        }
-
-        stage('Push Image to Docker Hub') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
-                        docker.image(env.DOCKER_IMAGE).push('latest')
+        stage('Deploy image') { 
+            steps { 
+                script { 
+                    docker.withRegistry( '', registryCredential ) { 
+                        dockerImage.push() 
                     }
-                }
+                } 
             }
-        }
-
-        stage('Clean Up') {
-            steps {
-                script {
-                    sh 'docker rm -f nodejs-container || true'
-                    sh 'docker rmi $DOCKER_IMAGE:latest || true'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                sh 'docker rm -f nodejs-container || true'
-                sh 'docker rmi $DOCKER_IMAGE:latest || true'
+        } 
+        stage('Cleaning up') { 
+            steps { 
+                sh "docker rmi $registry:latest" 
             }
         }
     }
