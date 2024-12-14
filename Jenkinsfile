@@ -43,7 +43,7 @@ pipeline {
 
         stage('Push Image to Docker Hub') {
             steps {
-                docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
+                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub') {
                     sh 'docker push $DOCKER_IMAGE:latest'
                 }
             }
