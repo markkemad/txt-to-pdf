@@ -1,35 +1,51 @@
-pipeline { 
-    environment { 
-        registry = "markemadd/txt-to-pdf-app" 
-        registryCredential = 'dockerhub' 
-        dockerImage = 'nodejsapp' 
+pipeline {
+    agent any
+
+    environment {
+        registry = "markemadd/txt-to-pdf-app"
+        registryCredential = 'dockerhub'
+        dockerImage = 'nodejsapp'
     }
-    agent any 
+
     stages {
-        stage('Cloning Git') { 
-            steps { 
-                git 'https://github.com/markkemad/txt-to-pdf.git' 
+        stage('Cloning Git') {
+            steps {
+                git branch: 'main', url: 'https://github.com/markkemad/txt-to-pdf.git', credentialsId: 'github'
             }
-        } 
-        stage('Building image') { 
-            steps { 
-                script { 
-                    dockerImage = docker.build registry + ":latest" 
-                }
-            } 
         }
-        stage('Deploy image') { 
-            steps { 
-                script { 
-                    docker.withRegistry( '', registryCredential ) { 
-                        dockerImage.push() 
-                    }
-                } 
+
+        stage('Building image') {
+            steps {
+                script {
+                    dockerImage = docker.build registry + ":latest"
+                }
             }
-        } 
-        stage('Cleaning up') { 
-            steps { 
-                sh "docker rmi $registry:latest" 
+        }
+
+        stage('Deploy image') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Cleaning up') {
+            steps {
+                script {
+                    sh "docker rmi $registry:latest"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                sh 'docker rm -f $(docker ps -aq) || true'
+                sh 'docker rmi $registry:latest || true'
             }
         }
     }
